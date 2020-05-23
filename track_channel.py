@@ -26,21 +26,26 @@ class TrackChannels(gph.GraphProgram):
         self.signal_measurement = signal_measurement
         self.signal_measurements = ["snq", "ss", "seq"]
         self.real_channels = real_channels
+
+        self.antenna = None
         self.labels = None
         self.mdf = None
 
     def _validate_args(self):
         results = [exists_in_db("channel", "mapping", value=channel) for channel in self.real_channels]
         results.extend([exists_in_db(measurement, "signal") for measurement in self.signal_measurements])
-
         return False if False in results else True
 
     def _build_df(self):
-        cols = ["scan_instance", "channel"] + [measurement for measurement in self.signal_measurements]
         signals = pd.DataFrame()
+        self.antenna = load("monitor", cols=["configured_antenna_instance"])["configured_antenna_instance"].to_list()[0]
+
         for channel in self.real_channels:
-            df = load("signal", cols=cols, conditions=[("channel", channel)]) 
-            df.columns = ["scan_instance", f"channel{channel}"] + [f"{measurement}{channel}" for measurement in self.signal_measurements]
+            df = load("signal", direct_query=f"""SELECT signal.scan_instance, snq, ss, seq
+                                                FROM signal INNER JOIN scan ON signal.scan_instance = scan.scan_instance 
+                                                WHERE channel={channel} AND antenna_instance={self.antenna}""")
+
+            df.columns = ["scan_instance"] + [f"{measurement}{channel}" for measurement in self.signal_measurements]
             signals = pd.merge(signals, df, how="inner", on="scan_instance") if not signals.empty else df
 
         scans = load("scan", cols=["scan_instance", "start_time"], datetimes=["start_time"])
@@ -67,7 +72,7 @@ class TrackChannels(gph.GraphProgram):
             signal_measurement_col = self.signal_measurement + f"{channel}"
             line, = self.ax.plot(self.mdf["start_time"], self.mdf[signal_measurement_col])
 
-        self.ax.set_title(f"{self.signal_measurement} Over Time")
+        self.ax.set_title(f"{self.signal_measurement} of Antenna Instance {self.antenna} Over Time")
         self.ax.set_ylabel(self.signal_measurement)
 
         # Adding interactive legend
@@ -123,7 +128,7 @@ class TrackChannels(gph.GraphProgram):
                     )
                     gph.enable_picking(self.ax.lines, self.leg, self.fig)
 
-                    title = f"Signal Measurements of Channel {channel}"
+                    title = f"Signal Measurements of Channel {channel} For Antenna Instance {self.antenna} Over Time"
                     y_label = "Signal Measurements"
                 else:
                     return
@@ -156,7 +161,7 @@ class TrackChannels(gph.GraphProgram):
                 # Recreate picker map
                 gph.enable_picking(self.ax.lines, self.leg, self.fig)
                 
-                title = f"{self.signal_measurement} Over Time"
+                title = f"{self.signal_measurement} of Antenna Instance {self.antenna} Over Time"
                 y_label = self.signal_measurement
                 
             # Set visibility of non selected lines
@@ -210,7 +215,6 @@ class TrackChannels(gph.GraphProgram):
         text = "Click legend keys to toggle lines. Use the radio buttons " \
             "to switch between signal measurements. The \"All\" option displays " \
             "all signal measurements for 1 channel if it is the only 1 selected"
-        r = sum([label.count("\n") for label in self.labels])
         self.fig.text(0.86, 0.01, text, wrap=True)
         plt.draw()
 

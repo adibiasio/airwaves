@@ -35,7 +35,7 @@ def exists_in_db(col, table, value=None, path=path_to_db) -> bool:
         return False
 
 
-def load(table, cols=None, conditions=[], direct_query=None, condition_op="AND", datetimes=[], distinct=False, path=path_to_db) -> pd.DataFrame:
+def load(table, direct_query=None, cols=None, conditions=[], condition_op="AND", datetimes=[], distinct=False, path=path_to_db) -> pd.DataFrame:
     """Converts sqlite3 db to pandas df
 
     @param[in] table - name of table to load
@@ -45,7 +45,7 @@ def load(table, cols=None, conditions=[], direct_query=None, condition_op="AND",
                             applied to the condition, default is false if not specified
     @param[in] direct_query - str with direct sql query (for more complex queries)
     @param[in] condition_op - SQL operator used between WHERE clauses
-    @param[in] datetimes -   List of names of unix timestamp columns, indicates data should be selected as datetimes
+    @param[in] datetimes -  List of names of unix timestamp columns, indicates data should be selected as datetimes
                             This column should still be included under the "cols" kwarg
     @param[in] distinct - Boolean, indicates whether to apply DISTINCT 
     @param[in] path - path to database
