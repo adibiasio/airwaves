@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from db import exists_in_db, load
-from graphing import GraphProgram, build_channel_labels, enable_picking
+from graphing import GraphProgram
 
 
 class ScanSummary(GraphProgram):
@@ -29,13 +29,11 @@ class ScanSummary(GraphProgram):
         # Retrieve relevant section of database
         filter_conditions = [("scan_instance", self.scan), ("snq", 0, True)]
         self.df = load("signal", conditions=filter_conditions)
-
-    def _build_labels(self):
-        self.labels = build_channel_labels(self.df["channel"].values.tolist())
+        self.real_channels = self.df["channel"].values.tolist()
 
     def _graph(self):
         width=0.25
-        fig, ax = plt.subplots()
+        self.fig, ax = plt.subplots(constrained_layout=True)
 
         # Getting data
         snq = self.df["snq"].values
@@ -55,10 +53,25 @@ class ScanSummary(GraphProgram):
         ax.set_xticks(xloc)
         ax.set_xticklabels(self.labels)
         leg = ax.legend()
-        enable_picking(bars, leg, fig)
+        self.enable_picking(bars, leg)
         ax.plot()
 
-        fig.tight_layout()
+    def _on_legend_pick(self, event):
+        """on pick toggle the visibility of all bars of a group
+
+        @parameter[in] event - matplotlib pick_event
+        """
+        patch = event.artist
+
+        for bar in self.legend_map[patch]:
+            vis = not plt.getp(bar, "visible")
+            plt.setp(bar, visible=vis)
+
+        # Change the alpha on legend to see toggled lines
+        if vis:
+            patch.set_alpha(1.0)
+        else:
+            patch.set_alpha(0.2)
 
 
 def main(args): 
@@ -92,5 +105,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # main(sys.argv[1:])
-    main(["83"])
+    main(sys.argv[1:])
+    # main(["83"])

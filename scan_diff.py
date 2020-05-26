@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from db import exists_in_db, load
-from graphing import GraphProgram, build_channel_labels, enable_picking
+from graphing import GraphProgram
 
 
 class ScanDiff(GraphProgram):
@@ -53,18 +53,16 @@ class ScanDiff(GraphProgram):
         # Sorting by scan 1's signal_measurement
         self.mdf = pd.merge(scan_dfs[0], scan_dfs[1], how="outer", on=["channel"], suffixes=("0", "1")) # merged data frame
         self.mdf = self.mdf.sort_values(by=self.signal_measurement + "1")
+        self.real_channels = self.mdf["channel"].values.tolist()
 
         # Replacing NaN values
         for i in range(0, len(self.scans)):
             self.mdf[f"scan_instance{i}"].fillna(self.scans[i], inplace=True)
             self.mdf[f"{self.signal_measurement}{i}"].fillna(0, inplace=True)
 
-    def _build_labels(self):
-        self.labels = build_channel_labels(self.mdf["channel"].values.tolist())
-
     def _graph(self):
         width = 0.35  # the width of the bars
-        fig, ax = plt.subplots()
+        self.fig, ax = plt.subplots(constrained_layout=True)
         x1 = self.mdf[self.signal_measurement + "0"]
         x2 = self.mdf[self.signal_measurement + "1"]
 
@@ -73,7 +71,7 @@ class ScanDiff(GraphProgram):
             bar1 = ax.bar(x - width/2, x1.values, width, label=f"Scan {self.scans[0]}")
             bar2 = ax.bar(x + width/2, x2.values, width, label=f"Scan {self.scans[1]}")
             leg = ax.legend()
-            enable_picking([bar1, bar2], leg, fig)
+            self.enable_picking([bar1, bar2], leg)
         else:
             # Create diff data set (scan1 - scan2)
             xdiff = x1 - x2
@@ -96,7 +94,22 @@ class ScanDiff(GraphProgram):
         ax.set_xticklabels(self.labels)
         ax.plot()
 
-        fig.tight_layout()
+    def _on_legend_pick(self, event):
+        """on pick toggle the visibility of all bars of a group
+
+        @parameter[in] event - matplotlib pick_event
+        """
+        patch = event.artist
+
+        for bar in self.legend_map[patch]:
+            vis = not plt.getp(bar, "visible")
+            plt.setp(bar, visible=vis)
+
+        # Change the alpha on legend to see toggled lines
+        if vis:
+            patch.set_alpha(1.0)
+        else:
+            patch.set_alpha(0.2)
 
 
 def main(args): 

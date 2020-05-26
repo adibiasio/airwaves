@@ -2,6 +2,7 @@
 """
 
 from abc import ABC, abstractmethod
+from itertools import cycle
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -18,7 +19,12 @@ class GraphProgram(ABC):
     """ABC for a Graphing Program
     """
     def __init__(self):
-        self.linestyles = ['solid', 'dashed', 'dashdot', 'dotted']
+        self.real_channels = None
+        self.labels = None
+        self.fig = None
+        self.legend_map = None
+        self.visible_object_count = 0
+
         self.colors = ["olive", "cyan", "lime", "red", "mediumpurple", 
                         "fuchsia", "darkorange", "dimgray", "darkblue", 
                         "darkgreen", "darkred", "purple", "saddlebrown", 
@@ -27,6 +33,7 @@ class GraphProgram(ABC):
                         "rosybrown", "silver", "dodgerblue", "darkolivegreen",
                         "mistyrose", "darkkhaki", "bisque", "springgreen",
                         "crimson", "tan", "forestgreen", "thistle"]
+        self.color_cycle = cycle(self.colors)
 
     @abstractmethod
     def _validate_args(self):
@@ -42,11 +49,22 @@ class GraphProgram(ABC):
         """
         pass
 
-    @abstractmethod
     def _build_labels(self):
         """Builds graph labels with real and virtual channel numbers
         """
-        pass
+        labels = [str(channel) + "\n---" for channel in self.real_channels]
+        mapping = load("mapping", cols=["channel", "virtual"])
+
+        # Converting virtual channel & station name str to sorted virtual channel float
+        mapping["virtual"] = pd.Series([float(virtual[0]) for virtual in mapping["virtual"].str.split().to_list()])
+        mapping = mapping.sort_values(by="virtual")
+
+        for real, virtual in zip(mapping["channel"].values, mapping["virtual"].values):
+            if real in self.real_channels:
+                i = self.real_channels.index(real)
+                labels[i] += "\n" + str(virtual)
+
+        self.labels = labels
 
     @abstractmethod
     def _graph(self):
@@ -63,6 +81,69 @@ class GraphProgram(ABC):
         self._build_labels()
         self._graph()
         plt.show()
+
+    # Adding graph functionality
+    def set_all_vis(self, objs, patches, visible=True):
+        """Toggles visibility of all objects
+
+        @parameter[in] objs - List of matplotlib line/bar objects
+        @parameter[in] patches - List of matplotlib patch objects
+        @parameter[in] visible - Bool specifying visibility state
+        """
+        for patch, obj in zip(patches, objs):
+            obj.toggle_vis(patch, visible=visible)
+        self.fig.canvas.draw()
+
+    def _on_legend_pick(self, event):
+        """on pick toggle line visibility
+
+        @parameter[in] event - matplotlib pick_event
+        """
+        patch = event.artist
+        self.legend_map[patch].toggle_vis(patch)
+
+    def enable_picking(self, objs, leg):
+        """Enables legend picking (toggles obj on legend entry click)
+
+        @parameter[in] objs - List of matplotlib line/bar objects
+        @parameter[in] leg - matplotlib legend object
+        """
+        self.legend_map = dict()
+
+        def _on_legend_pick_wrapper(event):
+            """Wrapper function for _on_legend_pick fn
+
+            @parameter[in] event - matplotlib pick_event
+            """
+            self._on_legend_pick(event)
+            self.fig.canvas.draw()
+
+        for patch, obj in zip(leg.legendHandles, objs):
+            patch.set_picker(5)
+            self.legend_map[patch] = obj
+            pickermap.update({patch:_on_legend_pick_wrapper})
+
+        self.fig.canvas.mpl_connect("pick_event", onpick)
+
+
+class MyLine2D(mpl.lines.Line2D):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def toggle_vis(self, patch, visible=None):
+        """Toggles visibility of a line object and its corresponding patch
+
+        @parameter[in] patch - corresponding matplotlib patch object
+        @parameter[in] visible - Bool specifying visibility state
+        """
+        vis = visible if type(visible) is bool else not self.get_visible()
+        self.set_visible(vis)
+    
+        # Change the alpha on legend to see toggled lines
+        if vis:
+            patch.set_alpha(1.0)
+        else:
+            patch.set_alpha(0.2)
 
 
 class MyRadioButtons(RadioButtons):
@@ -92,6 +173,7 @@ class MyRadioButtons(RadioButtons):
         self.activecolor = activecolor
         axcolor = ax.get_facecolor()
         self.value_selected = None
+        self.stashed_buttons = []
 
         ax.set_xticks([])
         ax.set_yticks([])
@@ -109,18 +191,77 @@ class MyRadioButtons(RadioButtons):
             circles.append(p)
         if orientation == "horizontal":
             kwargs.update(ncol=len(labels), mode="expand")
-        kwargs.setdefault("frameon", False)    
+        kwargs.setdefault("frameon", False)
         self.box = ax.legend(circles, labels, loc="center", **kwargs)
         self.labels = self.box.texts
+        self.label_strings = [text.get_text() for text in self.labels]
         self.circles = self.box.legendHandles
-        for c in self.circles:
-            c.set_picker(5)
         self.cnt = 0
         self.observers = {}
+        self.ax = ax
+        self._kwargs = kwargs
 
         for circle in self.circles:
-            add_to_picker_map(circle, self._on_radio_button_click)
+            circle.set_picker(5)
+            pickermap.update({circle:self._on_radio_button_click})
         self.connect_event('pick_event', onpick)
+
+    def stash_button(self, label_str):
+        """Stashes a Radio Button (Button and Label)
+
+        @param[in] label_str - String with button label
+        """
+        if label_str in self.label_strings:
+            button_num = self.label_strings.index(label_str)
+            stash_label = self.label_strings[button_num]
+            stash_text = self.labels[button_num]
+            stash_circle = self.circles[button_num]
+
+            for circle in self.circles:
+                del pickermap[circle]
+
+            self.labels.remove(stash_text)
+            self.label_strings.remove(stash_label)
+            self.circles.remove(stash_circle)
+            self.stashed_buttons.append((stash_text, stash_circle, button_num))
+
+            # Recreate Radio Button box
+            self.box.remove()
+            self.box = self.ax.legend(self.circles, self.label_strings, loc="center", **self._kwargs)
+            self.circles = self.box.legendHandles
+            for circle in self.circles:
+                circle.set_picker(5)
+                pickermap.update({circle:self._on_radio_button_click})
+            plt.draw()
+
+    def unstash_button(self, label):
+        """Unstashes a Radio Button (Button and Label)
+
+        @param[in] label - String with button label (matplotlib Text object)
+        """
+        # "button" is tuple of format (matplotlib.text.Text label, Circle circle, int index)
+        stashed_labels = [button[0].get_text() for button in self.stashed_buttons]
+        if label in stashed_labels:
+            for circle in self.circles:
+                del pickermap[circle]
+
+            stashed_button_num = stashed_labels.index(label)
+            button = self.stashed_buttons[stashed_button_num]
+            self.labels.insert(button[2], button[0])
+            self.label_strings.insert(button[2], button[0].get_text())
+            self.circles.insert(button[2], button[1])
+            self.stashed_buttons.remove(button)
+
+            # Recreate Radio Button box & functions
+            self.box.remove()
+            self.box = self.ax.legend(self.circles, self.label_strings, loc="center", **self._kwargs)
+            self.circles = self.box.legendHandles
+            for circle in self.circles:
+                circle.set_picker(5)
+                pickermap.update({circle:self._on_radio_button_click})
+
+            pickermap.update({button[1]:self._on_radio_button_click})
+            plt.draw()
 
     def _on_radio_button_click(self, event):
         """On click function for radio button
@@ -134,125 +275,29 @@ class MyRadioButtons(RadioButtons):
             self.set_active(self.circles.index(event.artist))
 
 
-def build_channel_labels(real_channels):
-    """Creates labels with corresponding virtual channels
+def make_patches(objects, labels):
+    """Creates a matplotlib patch of the same color for each matplotlib object (line/bar)
 
-    @parameter[in] real_channels - List of real channels to map & create labels from
-    @parameter[out] labels - List of real channel, virtual channel strings
-    """
-    labels = [str(channel) + "\n---" for channel in real_channels]
-    mapping = load("mapping", cols=["channel", "virtual"])
-
-    # Converting virtual channel & station name str to sorted virtual channel float
-    mapping["virtual"] = pd.Series([float(virtual[0]) for virtual in mapping["virtual"].str.split().to_list()])
-    mapping = mapping.sort_values(by="virtual")
-
-    for real, virtual in zip(mapping["channel"].values, mapping["virtual"].values):
-        if real in real_channels:
-            i = real_channels.index(real)
-            labels[i] += "\n" + str(virtual)
-
-    return labels
-
-
-def make_patch(lines, labels):
-    """Creates a matplotlib patch of the same color for each line
-
-    @param[out] patches - List of matplotlib Patch objects
+    @parameter[in] objects - List of matplotlib line/bar objects
+    @return patches - List of matplotlib Patch objects
     """
     patches = []
-    for line, label in zip(lines, labels):
-        color = plt.getp(line, "color")
+    for obj, label in zip(objects, labels):
+        color = plt.getp(obj, "color")
         patch = mpl.patches.Patch(color=color, label=label)
         patches.append(patch)
 
     return patches
 
 
-def toggle_vis(patch, original_obj, visible=None):
-    """Toggles visibility of a patch and object
-
-    @parameter[in] patch - matplotlib patch object
-    @parameter[in] original_obj - matplotlib line/bar object
-    @parameter[in] vis - Bool specifying visibility state
-    """
-    if isinstance(original_obj, mpl.container.BarContainer):
-        # For bar graph
-        for patch in original_obj.patches:
-            vis = visible if type(visible) is bool else not plt.getp(patch, "visible")
-            plt.setp(patch, visible=vis)
-    else:
-        # For line graph
-        vis = visible if type(visible) is bool else not original_obj.get_visible()
-        original_obj.set_visible(vis)
- 
-    # Change the alpha on legend to see toggled lines
-    if vis:
-        patch.set_alpha(1.0)
-    else:
-        patch.set_alpha(0.2)
-
-
-def set_all_vis(objs, patches, fig, visible=True):
-    """Toggles visibility of all objects
-
-    @parameter[in] objs - List of matplotlib line/bar objects
-    @parameter[in] patches - List of matplotlib patch objects
-    @parameter[in] fig - matplotlib figure object
-    @parameter[in] visible - Bool specifying visibility state
-    """
-    for patch, obj in zip(patches, objs):
-        toggle_vis(patch, obj, visible=visible)
-    fig.canvas.draw()
-
-
-def add_to_picker_map(artist, func, pickermap=pickermap):
-    """Adds artist and picker fn pair to pickermap dict
-
-    @parameter[in] artist - matplotlib artist object
-    @parameter[in] func - function to be called on artist click
-    @parameter[in] pickermap - dict with artist: picker_fn pairs
-    """
-    if func != None:
-        pickermap.update({artist:func})
-
-
-def onpick(event, pickermap=pickermap):
+def onpick(event):
     """General picker function, redirects pick event to correct
     function with pickermap
 
     @parameter[in] event - matplotlib picker event
-    @parameter[in] pickermap - dict with artist: picker_fn pairs
     """
     if event.artist in pickermap:
         pickermap[event.artist](event)
-
-
-def enable_picking(objs, leg, fig):
-    """Enables legend picking (toggles obj on legend entry click)
-
-    @parameter[in] objs - List of matplotlib line/bar objects
-    @parameter[in] leg - matplotlib legend object
-    @parameter[in] fig - matplotlib figure object
-    """
-    obj_d = dict()
-
-    def _on_legend_pick(event):
-        """on pick toggle line visibility
-
-         @parameter[in] event - matplotlib pick_event
-        """
-        patch = event.artist
-        original_obj = obj_d[patch]
-        toggle_vis(patch, original_obj)
-        fig.canvas.draw()
-
-    for patch, obj in zip(leg.legendHandles, objs):
-        patch.set_picker(5)
-        obj_d[patch] = obj
-        add_to_picker_map(patch, _on_legend_pick)
-
-    fig.canvas.mpl_connect("pick_event", onpick)
 
 
 if __name__ == "__main__":
