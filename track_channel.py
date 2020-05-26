@@ -225,16 +225,16 @@ class TrackChannels(gph.GraphProgram):
         toggle_btn_ax._button = self.toggle_btn # Store button in axes
         self.toggle_btn.on_clicked(_toggle_btn_wrapper)
 
-        text = "Click legend keys to toggle lines. Use radio buttons " \
-            "to switch between signal measurements. The \"All\" option  " \
-            "appears when one channel is selected, use it to view all measurements"
+        text = "Click lines or corresponding legend keys to toggle visiibility. Use " \
+            "radio buttons to switch signal measurements. The \"All\" option appears " \
+            "when one channel is selected, use it to view all measurements"
         self.fig.text(0.86, 0.01, text, wrap=True, fontsize=9)
         plt.draw()
 
     def _on_legend_pick(self, event):
         super()._on_legend_pick(event)
         if self.radio_btn.value_selected != "All":
-            self.visible_line_count = [line.get_visible() for patch, line in self.legend_map.items()].count(True)
+            self.visible_line_count = [line.get_visible() for line in self.ax.lines].count(True)
             if self.visible_line_count == 1:
                 self.radio_btn.unstash_button("All")
             elif "All" in self.radio_btn.label_strings:

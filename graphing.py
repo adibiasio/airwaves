@@ -99,14 +99,18 @@ class GraphProgram(ABC):
 
         @parameter[in] event - matplotlib pick_event
         """
-        patch = event.artist
-        self.legend_map[patch].toggle_vis(patch)
+        try:
+            # If object is toggled, it must be set to hidden
+            # (Users can't interact with hidden objects)
+            event.artist.toggle_vis(self.legend_map[event.artist], visible=False)
+        except AttributeError:
+            self.legend_map[event.artist].toggle_vis(event.artist)
 
     def enable_picking(self, objs, leg):
         """Enables legend picking (toggles obj on legend entry click)
 
         @parameter[in] objs - List of matplotlib line/bar objects
-        @parameter[in] leg - matplotlib legend object
+        @parameter[in] leg - matplotlib Legend objects
         """
         self.legend_map = dict()
 
@@ -116,12 +120,13 @@ class GraphProgram(ABC):
             @parameter[in] event - matplotlib pick_event
             """
             self._on_legend_pick(event)
-            self.fig.canvas.draw()
 
         for patch, obj in zip(leg.legendHandles, objs):
             patch.set_picker(5)
+            obj.set_picker(5)
             self.legend_map[patch] = obj
-            pickermap.update({patch:_on_legend_pick_wrapper})
+            self.legend_map[obj] = patch
+            pickermap.update({patch:_on_legend_pick_wrapper, obj:_on_legend_pick_wrapper})
 
         self.fig.canvas.mpl_connect("pick_event", onpick)
 
@@ -144,7 +149,6 @@ class MyLine2D(mpl.lines.Line2D):
             patch.set_alpha(1.0)
         else:
             patch.set_alpha(0.2)
-
 
 class MyRadioButtons(RadioButtons):
     """Class adapted from https://stackoverflow.com/questionss/55095111/displaying-radio-buttons-horizontally-in-matplotlib 
@@ -298,6 +302,7 @@ def onpick(event):
     """
     if event.artist in pickermap:
         pickermap[event.artist](event)
+    plt.draw()
 
 
 if __name__ == "__main__":
