@@ -233,12 +233,16 @@ class TrackChannels(gph.GraphProgram):
 
     def _on_legend_pick(self, event):
         super()._on_legend_pick(event)
+        self.visible_line_count = [line.get_visible() for line in self.ax.lines].count(True)
         if self.radio_btn.value_selected != "All":
-            self.visible_line_count = [line.get_visible() for line in self.ax.lines].count(True)
             if self.visible_line_count == 1:
                 self.radio_btn.unstash_button("All")
             elif "All" in self.radio_btn.label_strings:
                 self.radio_btn.stash_button("All")
+        if self.visible_line_count == 0 and self.toggle_btn.label.get_text() == "Hide All":
+            self.toggle_btn.label.set_text("Show All")
+
+            
 
 
 if __name__ == "__main__":
