@@ -11,6 +11,7 @@ import pandas as pd
 from db import exists_in_db, load
 from graphing import GraphProgram
 
+matplotlib.use("TkAgg")
 
 class ScanSummary(GraphProgram):
     """Graphs ss, snq, and seq for a single scan
@@ -27,8 +28,7 @@ class ScanSummary(GraphProgram):
 
     def _build_df(self):
         # Retrieve relevant section of database
-        filter_conditions = [("scan_instance", self.scan), ("snq", 0, True)]
-        self.df = load("signal", conditions=filter_conditions)
+        self.df = load(f"SELECT * FROM signal WHERE scan_instance={self.scan} AND snq>0")
         self.real_channels = self.df["channel"].values.tolist()
 
     def _graph(self):

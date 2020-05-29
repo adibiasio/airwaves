@@ -12,7 +12,9 @@ import pandas as pd
 from cycler import cycler
 
 import graphing as gph
-from db import exists_in_db, load
+from db import load
+
+mpl.use("TkAgg")
 
 
 class TrackChannels(gph.GraphProgram):
@@ -39,8 +41,8 @@ class TrackChannels(gph.GraphProgram):
     def _build_df(self):
         signals = pd.DataFrame()
         if self.antenna == None:
-            self.antenna = load("monitor", cols=["configured_antenna_instance"])["configured_antenna_instance"].to_list()[0]
-            self.real_channels = load("scan", direct_query="""SELECT DISTINCT channel FROM signal WHERE snq>0""")["channel"].to_list()
+            self.antenna = load("SELECT configured_antenna_instance FROM monitor")["configured_antenna_instance"].to_list()[0]
+            self.real_channels = load("SELECT DISTINCT channel FROM signal WHERE snq>0")["channel"].to_list()
             self.real_channels = sorted(self.real_channels, reverse=True)
             self.visible_line_count = len(self.real_channels)
 
@@ -50,14 +52,16 @@ class TrackChannels(gph.GraphProgram):
             return
 
         for channel in self.real_channels:
-            df = load("signal", direct_query=f"""SELECT signal.scan_instance, snq, ss, seq
-                                                FROM signal INNER JOIN scan ON signal.scan_instance = scan.scan_instance 
-                                                WHERE channel={channel} AND antenna_instance={self.antenna}""")
+            df = load(f"""SELECT signal.scan_instance, snq, ss, seq
+                        FROM signal INNER JOIN scan ON signal.scan_instance = scan.scan_instance 
+                        WHERE channel={channel} AND antenna_instance={self.antenna}""")
 
             df.columns = ["scan_instance"] + [f"{measurement}{channel}" for measurement in self.signal_measurements]
             signals = pd.merge(signals, df, how="inner", on="scan_instance") if not signals.empty else df
 
-        scans = load("scan", cols=["scan_instance", "start_time"], datetimes=["start_time"])
+        scans = load("select scan_instance, datetime(start_time,'unixepoch','localtime') from scan")
+        scans = scans.rename(columns={"datetime(start_time,'unixepoch','localtime')":"start_time"})
+        scans = scans.astype({"start_time":"datetime64[ns]"})
         self.mdf = pd.merge(signals, scans, how="inner", on=["scan_instance"]) # merged data frame
         self.cached_antennas.update({self.antenna:(self.mdf,self.real_channels)})
 
@@ -209,8 +213,13 @@ class TrackChannels(gph.GraphProgram):
             @param[in] event - str with the submitted antenna instance
             """
             try:
-                self.antenna = int(event)
+                int(event)
             except ValueError:
+                return
+
+            if int(event) in load("SELECT antenna_instance FROM antenna")["antenna_instance"].to_list():
+                self.antenna = int(event) 
+            else:
                 return
 
             self._build_df()

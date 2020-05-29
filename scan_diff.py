@@ -11,6 +11,7 @@ import pandas as pd
 from db import exists_in_db, load
 from graphing import GraphProgram
 
+matplotlib.use("TkAgg")
 
 class ScanDiff(GraphProgram):
     """Graphs differences in signal measurements between two scan instances
@@ -36,10 +37,10 @@ class ScanDiff(GraphProgram):
         scan_dfs = []
 
         if self.signal_measurement == "snq":
-            channels = load("signal", direct_query=f"""SELECT DISTINCT channel FROM signal 
-                                                        WHERE (scan_instance = {self.scans[0]} 
-                                                        OR scan_instance={self.scans[1]}) AND 
-                                                        NOT snq = 0""")["channel"].to_list()
+            channels = load(f"""SELECT DISTINCT channel FROM signal 
+                                WHERE (scan_instance = {self.scans[0]} 
+                                OR scan_instance={self.scans[1]}) AND 
+                                NOT snq = 0""")["channel"].to_list()
             temp_conditions = [("channel", channels)]
         else:
             temp_conditions = [("snq", 0, True)] # Channel is not watchable if snq = 0 
@@ -48,7 +49,8 @@ class ScanDiff(GraphProgram):
         cols=["scan_instance", "channel", self.signal_measurement]
         for scan in self.scans:
             filter_conditions = temp_conditions + [("scan_instance", scan)]
-            scan_dfs.append(load("signal", cols=cols, conditions=filter_conditions))
+            scan_dfs.append(load(f"""SELECT scan_instance, channel, snq, ss, seq FROM
+                                    signal WHERE scan_instance={scan} AND snq>0"""))
 
         # Sorting by scan 1's signal_measurement
         self.mdf = pd.merge(scan_dfs[0], scan_dfs[1], how="outer", on=["channel"], suffixes=("0", "1")) # merged data frame

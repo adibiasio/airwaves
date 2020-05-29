@@ -54,7 +54,7 @@ class GraphProgram(ABC):
         """Builds graph labels with real and virtual channel numbers
         """
         labels = [str(channel) + "\n---" for channel in self.real_channels]
-        self.mapping = load("mapping", cols=["channel", "virtual"])
+        self.mapping = load("SELECT channel, virtual FROM mapping")
 
         # Converting virtual channel & station name str to sorted virtual channel float
         self.mapping["virtual"] = pd.Series([float(virtual[0]) for virtual in self.mapping["virtual"].str.split().to_list()])
@@ -125,7 +125,12 @@ class GraphProgram(ABC):
 
         for patch, obj in zip(leg.legendHandles, objs):
             patch.set_picker(5)
-            obj.set_picker(5)
+
+            try:
+                obj.set_picker(5)
+            except AttributeError:
+                pass
+            
             self.legend_map[patch] = obj
             self.legend_map[obj] = patch
             pickermap.update({patch:_on_legend_pick_wrapper, obj:_on_legend_pick_wrapper})
