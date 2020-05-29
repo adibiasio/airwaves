@@ -22,6 +22,7 @@ class GraphProgram(ABC):
         self.real_channels = None
         self.labels = None
         self.fig = None
+        self.leg = None
         self.legend_map = None
         self.visible_object_count = 0
 
@@ -33,7 +34,7 @@ class GraphProgram(ABC):
                         "rosybrown", "silver", "dodgerblue", "darkolivegreen",
                         "mistyrose", "darkkhaki", "bisque", "springgreen",
                         "crimson", "tan", "forestgreen", "thistle"]
-        self.color_cycle = cycle(self.colors)
+        self.color_cycle = cycle(self.colors) # Generator for color cycle
 
     @abstractmethod
     def _validate_args(self):
@@ -53,13 +54,13 @@ class GraphProgram(ABC):
         """Builds graph labels with real and virtual channel numbers
         """
         labels = [str(channel) + "\n---" for channel in self.real_channels]
-        mapping = load("mapping", cols=["channel", "virtual"])
+        self.mapping = load("mapping", cols=["channel", "virtual"])
 
         # Converting virtual channel & station name str to sorted virtual channel float
-        mapping["virtual"] = pd.Series([float(virtual[0]) for virtual in mapping["virtual"].str.split().to_list()])
-        mapping = mapping.sort_values(by="virtual")
+        self.mapping["virtual"] = pd.Series([float(virtual[0]) for virtual in self.mapping["virtual"].str.split().to_list()])
+        self.mapping = self.mapping.sort_values(by="virtual")
 
-        for real, virtual in zip(mapping["channel"].values, mapping["virtual"].values):
+        for real, virtual in zip(self.mapping["channel"].values, self.mapping["virtual"].values):
             if real in self.real_channels:
                 i = self.real_channels.index(real)
                 labels[i] += "\n" + str(virtual)
@@ -92,7 +93,6 @@ class GraphProgram(ABC):
         """
         for patch, obj in zip(patches, objs):
             obj.toggle_vis(patch, visible=visible)
-        self.fig.canvas.draw()
 
     def _on_legend_pick(self, event):
         """on pick toggle line visibility
@@ -100,10 +100,12 @@ class GraphProgram(ABC):
         @parameter[in] event - matplotlib pick_event
         """
         try:
-            # If object is toggled, it must be set to hidden
-            # (Users can't interact with hidden objects)
+            # If object is clicked, it must be set to hidden
+            # (Users can't click a hidden objects)
             event.artist.toggle_vis(self.legend_map[event.artist], visible=False)
         except AttributeError:
+            # Users can toggle visibility of an object from the legend
+            # unconditionally
             self.legend_map[event.artist].toggle_vis(event.artist)
 
     def enable_picking(self, objs, leg):
@@ -277,6 +279,36 @@ class MyRadioButtons(RadioButtons):
             return
         if event.artist in self.circles:
             self.set_active(self.circles.index(event.artist))
+
+
+class MyTextBox(mpl.widgets.TextBox):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _click(self, event):
+        if self.ignore(event):
+            return
+        if event.inaxes != self.ax:
+            self.stop_typing()
+            return
+        if not self.eventson:
+            return
+        if not plt.getp(self.label, "visible"):
+            return
+        if event.canvas.mouse_grabber != self.ax:
+            event.canvas.grab_mouse(self.ax)
+        if not self.capturekeystrokes:
+            self.begin_typing(event.x)
+        self.position_cursor(event.x)
+
+    def set_visible(self, visible):
+        """Toggles visibility of the TextBox
+
+        @parameter[in] visible - Bool specifying visibility state
+        """
+        plt.setp(self.label, visible=visible)
+        plt.setp(self.text_disp, visible=visible)
+        plt.setp(self.cursor, visible=visible)
 
 
 def make_patches(objects, labels):
