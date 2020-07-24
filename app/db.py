@@ -5,7 +5,7 @@ import sqlite3 as sql
 
 import pandas as pd
 
-path_to_db = "/mnt/l/monitor.db"
+path_to_db = "monitor.db"
 
 
 def load(query, *args, path=path_to_db) -> pd.DataFrame:

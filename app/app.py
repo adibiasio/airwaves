@@ -157,5 +157,5 @@ def channel_distribution_antenna_api():
     )
 
 if __name__ == "__main__":
-    # app.run(host="198.137.202.74", port="58000", debug=False)
-    app.run(host="127.0.0.1", port="8000", debug=True)
+    app.run(host="198.137.202.74", port="58000", debug=False)
+    # app.run(host="127.0.0.1", port="8000", debug=True)
