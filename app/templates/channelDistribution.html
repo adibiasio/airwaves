@@ -1,0 +1,242 @@
+{% extends "layout.html" %}
+{% block header %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/select2.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename = 'styles/bootstrap-datetimepicker.min.css') }}">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/channelDistribution.css') }}">
+<script type="text/javascript" src="{{ url_for('static', filename = 'plotly.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'select2.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'moment.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'bootstrap-datetimepicker.min.js') }}"></script>
+
+
+<div class="jumbotron text-center">
+    <h1>Channel Distribution</h1>
+    <p>Plotting Signal Measurement Distributions for Various Channels</p>
+</div>
+<div id='graph-container'></div>
+
+<div id="controls">
+    <div id="main-controls">
+        <div id="selectboxes">
+            <div id="channel-input">
+                <label for="select-channel">Channel:</label>
+                <select class="form-control" id="select-channel" name="state" style="width: 45%;">
+                </select>
+            </div>
+
+            <div id="channel-loading">
+                <br>
+                <img id="channel-loading-circle" style="width: 30px; height: 30px; padding-top: 1%;"
+                    src="http://www.employees.org/~ad4437/loading-spinner.gif" alt="">
+            </div>
+
+            <div id="antenna-instance-input">
+                <label for="select-antenna">Antenna Instance:</label>
+                <select class="form-control" id="select-antenna" name="state">
+                </select>
+            </div>
+
+            <div id="antenna-loading">
+                <br>
+                <img id="antenna-loading-circle" style="width: 30px; height: 30px;"
+                    src="http://www.employees.org/~ad4437/loading-spinner.gif" alt="">
+            </div>
+        </div>
+
+        <div id="radio-buttons">
+            <div id="signal-measurement-radio">
+                <form>
+                    <label for="radio-inline">Frequency Distribution:</label><br>
+                    <label class="radio-inline"><input type="radio" name="freqradio" value="counts"
+                            id="freqRadio">Frequency
+                        (counts)</label>
+                    <label class="radio-inline"><input type="radio" name="freqradio" value="percents"
+                            id="relFreqRadio">Relative
+                        Frequency (%)</label>
+                </form>
+            </div>
+
+            <div id="model-type-radio">
+                <form>
+                    <label for="radio-inline">Model Type:</label><br>
+                    <label class="radio-inline"><input type="radio" name="modelradio" value="kde" id="kdeRadio">Kernel
+                        Density
+                        Estimation (kde)</label>
+                    <label class="radio-inline"><input type="radio" name="modelradio" value="normal"
+                            id="normalRadio">Normal</label>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="buttons">
+        <br>
+        <button id='filter' class='btn'><i class='fa fa-filter'></i></button>
+        <button id='hide-models' class='btn'>Hide Models</button>
+    </div>
+
+    <div class="modal fade bd-example-modal-lg" id="filterModal" tabindex="-1" role="dialog"
+        aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="exampleModalLabel" style="display:inline;">Filter Conditions</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>Time</h4>
+
+                    <div id="time" class="container" style="margin-left:1%;">
+                        <div class="row">
+                            <label for="timepicker-groups" style="margin-left:1.25%;">Time of Day: </label>
+                            <div id="timepicker-groups">
+                                <div id='timepicker-start-group' class='col-md-4'>
+                                    <div class='input-group date' id='timepicker-start'>
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-time"></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div id='timepicker-end-group' class='col-md-4'>
+                                    <div class='input-group date' id='timepicker-end'>
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-time"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="row">
+                            <label for="datetimepicker-groups" style="margin-left:1.25%;">Scan Date Range: </label>
+                            <div id="datetimepicker-groups">
+                                <div id='datetimepicker-start-group' class='col-md-4'>
+                                    <div class='input-group date' id='datetimepicker-start'>
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-fw fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div id='datetimepicker-end-group' class='col-md-4'>
+                                    <div class='input-group date' id='datetimepicker-end'>
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-fw fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h4>Weather</h4>
+
+                    <div id="weather" class="container" style="margin-left:1%;">
+                        <div class="row">
+                            <div id="temp-input" class="col-md-4">
+                                <label for="temp-range">Temperature Range (&degF):</label>
+                                <div id="temp-range" style="display: block ruby;">
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="temp-start" placeholder="Fahrenheit">
+                                    to
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="temp-end" placeholder="Fahrenheit">
+                                </div>
+                            </div>
+
+                            <div id="wind-speed-input" class="col-md-4">
+                                <label for="wind-speed-range">Wind Speed Range (mph):</label>
+                                <div id="wind-speed-range" style="display: block ruby;">
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="wind-speed-start" placeholder="Miles Per Hour">
+                                    to
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="wind-speed-end" placeholder="Miles Per Hour">
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="row">
+                            <div id="wind-direction-input" class="col-md-4">
+                                <label for="wind-direction-range">Wind Direction Range (Degrees):</label>
+                                <div id="wind-direction-range" style="display: block ruby;">
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="wind-direction-start" placeholder="Degrees">
+                                    to
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="wind-direction-end" placeholder="Degrees">
+                                </div>
+                            </div>
+
+                            <div id="humidity-input" class="col-md-4">
+                                <label for="humidity-range">Humidity Range (%):</label>
+                                <div id="humidity-range" style="display: block ruby;">
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="humidity-start" placeholder="% Humidity">
+                                    to
+                                    <input type="text" class="form-control input-group-lg short-text-input"
+                                        id="humidity-end" placeholder="% Humidity">
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="row">
+                            <div id="weather-status-input" class="col-md-8">
+                                <label for="select-weather-status">Weather Status:</label>
+                                <select class="form-control input-group-lg" id="select-weather-status" name="state">
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="invalid-filter-condition" style="display:none;">
+                        <br>
+                        <div class="alert alert-danger" role="alert">
+                            Invalid Filter Condition
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        style="float: left;">Close</button>
+                    <button type="button" id="clear-filter" class="btn btn-danger" data-dismiss="modal">Clear All
+                        Filters</button>
+                    <button type="button" id="apply-filter" class="btn btn-primary">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <br>
+</div>
+
+<script>
+    var figure = JSON.parse('{{ figure | safe }}');
+    var legendTitle = '{{ legendTitle | safe }}';
+    var antennaMap = JSON.parse('{{ antennaMap | safe }}');
+    var channelMap = JSON.parse('{{ channelMap | safe }}');
+    var weatherMap = JSON.parse('{{ weatherMap | safe }}');
+    var defaultAntenna = '{{ defaultAntenna | safe }}';
+    var defaultChannel = '{{ defaultChannel | safe }}';
+</script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/channelDistribution.js') }}"></script>
+
+{% endblock header %}

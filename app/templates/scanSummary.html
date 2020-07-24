@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+{% block header %}
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/select2.min.css') }}">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css">
+<link rel="stylesheet" href="{{ url_for('static', filename = 'styles/bootstrap-datetimepicker.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/scanSummary.css') }}">
+<script type="text/javascript" src="{{ url_for('static', filename = 'plotly.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'select2.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'moment.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'bootstrap-datetimepicker.min.js') }}"></script>
+
+
+<div class='jumbotron text-center'>
+    <h1 id='title'>Scan Summary</h1>
+    <p>Plotting Channel Signal Measurements for an Individual Scan</p>
+</div>
+<div id='graph-container'></div>
+
+<div id="controls">
+    <div id='datetimepicker-group'>
+        <label for="datetimepicker">Scan Start Time: </label>
+        <div class='input-group date' id='datetimepicker'>
+            <input type='text' class="form-control" />
+            <span class="input-group-addon">
+                <i class="fa fa-fw fa-calendar"></i>
+            </span>
+        </div>
+    </div>
+
+    <div id="antenna-instance-input">
+        <label for="select-antenna">Antenna Instance:</label>
+        <select class="form-control" id="select-antenna" name="state">
+        </select>
+    </div>
+</div>
+<div>
+    <br>
+</div>
+
+<script>
+    var defaultAntenna = '{{ defaultAntenna | safe }}';
+    var antennaMap = JSON.parse('{{ antennaMap | safe }}');
+    var figure = JSON.parse('{{ figure | safe }}')
+</script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/scanSummary.js') }}"></script>
+{% endblock header %}

@@ -1,0 +1,38 @@
+#graph-container {
+    width: 90%;
+    margin: auto;
+}
+
+#controls {
+    display: flex;
+    width: 82.5%;
+    margin: auto;
+}
+
+#datetimepicker-group {
+    width: 15vw;
+}
+
+#antenna-instance-input {
+    margin-left: 1%;
+}
+
+.form-control {
+    height: 29px;
+}
+
+.select2 {
+    width: 100% !important;
+}
+
+/* Responsive select2 selectbox (Word wrap and flex-grow) */
+.select2-selection--single {
+    overflow: hidden;
+    text-overflow: ellipsis !important;
+}
+
+.select2-selection__rendered {
+    word-wrap: break-word !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
+}

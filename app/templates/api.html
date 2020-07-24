@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+{% block header %}
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css">
+
+<div class="jumbotron text-center" style="margin-bottom: 0px;">
+    <h1>API</h1>
+    <p>The API Interface</p>
+</div>
+
+<div class="jumbotron" style="margin-bottom: 0px;">
+    <div style="padding-left: 5%; padding-right: 5%;">
+        <h2>Track Channel API <a href="http://www.employees.org:58000/graphs/trackchannel/api?" target="_blank"><i
+                    class="fa fa-external-link" aria-hidden="true"></i></a></h2>
+        <p>Returns a Plotly figure object, list of channel labels, and a list of scan weather annotations</p>
+        <br>
+        <div class="container" style="margin-left: 0px; padding-left: 0px;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>antenna</td>
+                        <td>The desired antenna instance</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h2>Channel Distribution API <a href="http://www.employees.org:58000/graphs/channeldistribution/channelapi?"
+                target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a></h2>
+        <p>Returns a Plotly figure object</p>
+        <br>
+        <div class="container" style="margin-left: 0px; padding-left: 0px;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>channel</td>
+                        <td>The desired real channel number</td>
+                    </tr>
+                    <tr>
+                        <td>antenna</td>
+                        <td>The desired antenna instance</td>
+                    </tr>
+                    <tr>
+                        <td>model</td>
+                        <td>The desired model type (kde or normal)</td>
+                    </tr>
+                    <tr>
+                        <td>histnorm</td>
+                        <td>The frequency distribution ("probability" for percents or none (don't include this
+                            parameter) for counts)</td>
+                    </tr>
+                    <tr>
+                        <td>tod</td>
+                        <td>The time of day (use this parameter twice: the first is the start and the second is the end
+                            hour) This only works if the time range is all within one day (12 AM to 12AM) for hours like
+                            9PM to 8AM use the inversetod parameter</td>
+                    </tr>
+                    <tr>
+                        <td>inversetod</td>
+                        <td>Set to true for tod hours that aren't within one day (i.e. 9PM to 8AM)</td>
+                    </tr>
+                    <tr>
+                        <td>daterange</td>
+                        <td>The date range of the scans (unix timestamp with a GMT-04:00 timezone) (use this parameter
+                            twice: the first is the start and the second is the end timestamp)</td>
+                    </tr>
+                    <tr>
+                        <td>temp</td>
+                        <td>The temperature range (in Farenheit) of the scans (use this parameter twice: the first is
+                            the start and the second is the end temperature)</td>
+                    </tr>
+                    <tr>
+                        <td>windspeed</td>
+                        <td>The windspeed range (in mph) of the scans (use this parameter twice: the first is
+                            the start and the second is the end wind speed)</td>
+                    </tr>
+                    <tr>
+                        <td>winddirection</td>
+                        <td>The wind dirction range (in degrees) of the scans (use this parameter twice: the first is
+                            the start and the second is the end number of degrees)</td>
+                    </tr>
+                    <tr>
+                        <td>humidity</td>
+                        <td>The humidity range (%) of the scans (use this parameter twice: the first is
+                            the start and the second is the end percentage)</td>
+                    </tr>
+                    <tr>
+                        <td>weatherstatus</td>
+                        <td>The weather status (get possible weather status values for an antenna instance here
+                            <a href="http://www.employees.org:58000/graphs/channeldistribution/antennaapi?"
+                                target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                            Use the antenna parameter to request the desired antenna instance)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h2>Scan Summary API <a href="http://www.employees.org:58000/graphs/scansummary/scanapi?" target="_blank"><i
+                    class="fa fa-external-link" aria-hidden="true"></i></a></h2>
+        <p>Returns a Plotly figure object and the scan's start time (GMT-04:00 unix timestamp)</p>
+        <br>
+        <div class="container" style="margin-left: 0px; padding-left: 0px;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>scantime</td>
+                        <td>The desired scan time (unix timestamp with a GMT-04:00 timezone) The scan closest to the
+                            desired time will be used</td>
+                    </tr>
+                    <tr>
+                        <td>antenna</td>
+                        <td>The desired antenna instance</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock header %}

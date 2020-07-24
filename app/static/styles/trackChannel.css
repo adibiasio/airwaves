@@ -1,0 +1,65 @@
+#graph-container {
+    width: 90%;
+    margin: auto;
+}
+
+#controls {
+    display: flex;
+    width: 86.25%;
+    margin-left: 8.75%;
+    margin-right: 5%;
+    flex-wrap: wrap;
+}
+
+#controls>* {
+    margin-top: 1%;
+}
+
+#antenna-instance-input {
+    padding-left: 2%;
+}
+
+#buttons {
+    flex: 1;
+}
+
+#buttons>button {
+    float: right;
+    margin-left: 1%;
+}
+
+/* Loading screen */
+#loading {
+    display: block;
+    text-align: center;
+    font-size: 30px;
+}
+
+#loading-content {
+    padding: 19%;
+}
+
+.page {
+    display: None;
+}
+
+.select2 {
+    width: 100% !important;
+}
+
+/* Responsive select2 selectbox (Word wrap and flex-grow) */
+.select2-selection--single {
+    overflow: hidden;
+    text-overflow: ellipsis !important;
+}
+
+.select2-selection__rendered {
+    word-wrap: break-word !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
+}
+
+/* Disable plotly notifications */
+.plotly-notifier {
+    display: none;
+}

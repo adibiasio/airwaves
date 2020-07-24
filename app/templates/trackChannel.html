@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+{% block header %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/select2.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/trackChannel.css') }}">
+<script type="text/javascript" src="{{ url_for('static', filename = 'plotly.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'select2.min.js') }}"></script>
+
+<div class='jumbotron text-center'>
+    <h1 id='title'>Track Channel</h1>
+    <p>Plotting Channel Signal Measurements Over Time</p>
+</div>
+
+<div class="page">
+    <div id='graph-container'></div>
+    <div id='controls'>
+        <div id="signal-measurement-radio">
+            <form>
+                <label for="radio-inline">Signal Measurement:</label><br>
+                <label class="radio-inline"><input type="radio" name="smradio" value="snq" id="snqRadio"
+                        checked>snq</label>
+                <label class="radio-inline"><input type="radio" name="smradio" value="ss" id="ssRadio">ss</label>
+                <label class="radio-inline"><input type="radio" name="smradio" value="seq" id="seqRadio">seq</label>
+            </form>
+        </div>
+
+        <div id="antenna-instance-input">
+            <label for="select-antenna">Antenna Instance:</label>
+            <select class="form-control" id="select-antenna" name="state">
+            </select>
+        </div>
+
+        <div id="buttons">
+            <br>
+            <button id='hide-all-traces' class='btn'>Hide All</button>
+            <button id='change-legend-view' class='btn'>Legend Scrollview</button>
+        </div>
+    </div>
+</div>
+<div id="loading">
+    <div id="loading-content">
+        Loading Antenna Data...<br>
+        <img id="loading-circle" src="http://www.employees.org/~ad4437/loading-spinner.gif" alt="">
+    </div>
+</div>
+<div>
+    <br>
+</div>
+
+<script>
+    var defaultAntenna = '{{ defaultAntenna | safe }}';
+    var antennaMap = JSON.parse('{{ antennaMap | safe }}');
+</script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/trackChannel.js') }}"></script>
+{% endblock header %}

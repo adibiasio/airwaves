@@ -1,0 +1,284 @@
+{% extends "layout.html" %}
+{% block header %}
+<div class="jumbotron text-center" style="margin-bottom: 0px;">
+    <h1>Help</h1>
+</div>
+<div class="jumbotron" style="overflow: hidden; margin-bottom: 0px;">
+    <div style="padding-left: 5%; padding-right: 5%;">
+        <h2>Graphing Programs</h2>
+        <p>All graphs use the Plotly Graphing Framework <a href="https://plotly.com/graphing-libraries/"
+                target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+            <br>
+            <br>
+            Basic Usage:
+            <br>
+            There are three types of signal measurements monitored by a HDHomeRun tuner: signal
+            strength (ss), signal quality (snq), and symbol (picture) quality (seq). HDHomeRun provides an
+            overview of what these mean and how to use them
+            <a href="https://info.hdhomerun.com/info/troubleshooting:signal_strength_quality" target="_blank"><i
+                    class="fa fa-external-link" aria-hidden="true"></i></a>
+            tl;dr: Signal quality best describes a signal's clarity, signal strength is somewhat irrelevant, and picture
+            quality is either 0 or 100, with 100 indicating a watchable signal and 0 a static signal.
+            <br>
+            <br>
+            These signal measurements are monitored and recorded for each real channel picked up by the antenna. Virtual
+            channel numbers are mapped to each real channel, hence their grouping in channel labels. Further reading on
+            real channels can be found
+            <a href="https://en.wikipedia.org/wiki/Television_channel_frequencies" target="_blank">here</a>,
+            and virtual channels can be found
+            <a href="https://en.wikipedia.org/wiki/Virtual_channel" target="_blank">here</a>.
+            Channel labels are composed of real channels and all virtual channels and their stations that map to it.
+            <br>
+            <br>
+            Hovering over a data point will trigger its tooltip, displaying its x and y data values and its
+            corresponding legend entry label.
+            <br>
+            Legends are displayed to the right of the graph. The Legend can be used to toggle the visibility of a data
+            set. Clicking a legend entry once will hide its corresponding data set; clicking it a second time will
+            return the data set to the graph.
+            <br>
+            <br>
+            The Modebar: <img src="http://www.employees.org/~ad4437/modebar.JPG" alt="Plotly Modebar" height="21px">
+            <br>
+            The modebar appears in the upper right corner of the graph when hovered over.
+            The modebar contains buttons that alter the graph usage and view, but not the data.
+            <br>
+            <br>
+            Modebar Button Index:
+        </p>
+        <div class="container" style="margin-left: 0px; padding-left: 0px;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Modebar Icon</th>
+                        <th>Function</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Camera</td>
+                        <td>Download static image of the current graph</td>
+                    </tr>
+                    <tr>
+                        <td>Magnifying Glass</td>
+                        <td>Zoom to box select (click and drag cursor to use box select)</td>
+                    </tr>
+                    <tr>
+                        <td>Double Arrows</td>
+                        <td>Pan graph</td>
+                    </tr>
+                    <tr>
+                        <td>Zoom +</td>
+                        <td>Zoom in</td>
+                    </tr>
+                    <tr>
+                        <td>Zoom -</td>
+                        <td>Zoom out</td>
+                    </tr>
+                    <tr>
+                        <td>Home</td>
+                        <td>Reset the graph to its default zoom view</td>
+                    </tr>
+                    <tr>
+                        <td>Spike Lines</td>
+                        <td>Shows spike lines for nearest data point on hover</td>
+                    </tr>
+                    <tr>
+                        <td>Single Badge</td>
+                        <td>Show closest data point tooltip on hover</td>
+                    </tr>
+                    <tr>
+                        <td>Double Badge</td>
+                        <td>Compare closest data poin on hover</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p>
+            <br>
+            In addition to plotly functionality, there are input fields underneath the graphs that modify the data
+            displayed. These inputs vary in usage and function between graphing programs, but the one consistent input
+            field is the Antenna Selectbox.
+            <br>
+            <br>
+            Antenna Selectbox:
+            <img src="http://www.employees.org/~ad4437/antennaselect.JPG" alt="Antenna Selectbox" height="40px">
+            <br>
+            By default, the selectbox is set to the configured antenna instance (currently monitored with hourly scans).
+            Antenna instance labels are composed by their unique ID, name, location (within the house), direction (in
+            degrees), and any other comments included in the antenna entry.
+        </p>
+
+        <br>
+        <h2>Track Channel <a href="http://www.employees.org:58000/graphs/trackchannel" target="_blank"><i
+                    class="fa fa-external-link" aria-hidden="true"></i></a></h2>
+        <p>
+            Plotting signal measurements of channels over time.
+            <br>
+            <br>
+            Signal Measurement Radio Buttons:
+            <img src="http://www.employees.org/~ad4437/signalmeasurement.JPG" alt="Signal Measurement Radio Buttons"
+                height="40px">
+            <br>
+            Signal quality is the default signal measurement, but this can be changed with the radio buttons. The
+            possible signal measurements are signal quality (snq), signal strength (Ss), and picture quality (seq).
+            <br>
+            <br>
+            Other Buttons:
+            <img src="http://www.employees.org/~ad4437/trackchannelbuttons.JPG" alt="Other Track Channel Buttons"
+                height="40px">
+            <br>
+            The "Legend Scrollview" button can be used to alternate between a scrollview and fullview of the legend.
+            The "Legend Fullview" displays all channels at the same time. Clicking this button will alternate between
+            the "Legend Scrollview" and "Legend Fullview" texts. The "Hide All" button can be used to hide all of
+            the channel line traces at once. If all traces are hidden, the text will update to "Show All," and can be
+            used to set all traces to visible.
+            <br>
+            <br>
+            Hovering over a data point will trigger a tooltip containing the timestamp, signal measurement value, and
+            available weather data reported at the time of that measurement.
+        </p>
+        <br>
+        <h2>Channel Distribution <a href="http://www.employees.org:58000/graphs/channeldistribution" target="_blank"><i
+                    class="fa fa-external-link" aria-hidden="true"></i></a></h2>
+        <p>
+            Plotting signal measurement distributions for various channels.
+            <br>
+            <br>
+            Channel Selectbox: <img src="http://www.employees.org/~ad4437/channelselect.JPG" alt="Channel Select"
+                height="40px">
+            <br>
+            By default, the selectbox is set to the lowest real channel number. To switch between channels, you can use
+            the selectbox to find the wanted channel, a search box is provided with the drop-up/down (Easier to find
+            virtual channels / stations). For faster channel selection, use the
+            <i class="fa fa-arrow-left" aria-hidden="true"></i> key to select the next lowest real channel and the
+            <i class="fa fa-arrow-right" aria-hidden="true"></i> key to select the next highest real channel.
+            <br>
+            <br>
+            Frequency Distribution Radio Buttons:
+            <img src="http://www.employees.org/~ad4437/freqdist.JPG" alt="Frequency Distribution Radio Buttons"
+                height="40px">
+            <br>
+            The Frequency Distribution y-data is automatically displayed as scan counts (Frequency). To use a Relative
+            Frequency Distribution, select "Relative Frequency". A Relative Frequency will use a percentage of the total
+            number of scans as the y-data.
+            <br>
+            <br>
+            Model Type:
+            <img src="http://www.employees.org/~ad4437/modeltype.JPG" alt="Model Type Radio Buttons" height="40px">
+            <br>
+            Models are provided as an estimation of a channel's signal measurement distributions. Two types of models
+            are provided, Gaussian Kernel Density Estimation
+            <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation" target="_blank"><i
+                    class="fa fa-external-link" aria-hidden="true"></i></a>
+            and Normal Distribution
+            <a href="https://en.wikipedia.org/wiki/Normal_distribution" target="_blank"><i class="fa fa-external-link"
+                    aria-hidden="true"></i></a>
+            Models. Use this radio button to switch between the two models. Models for picture quality (seq) are either
+            100% at measurements of 0 or 100 or split between the two. For channels that are consistently recepted, the
+            signal strength will typically be 100 most of the time. This creates very tall modes at 0 and 100 along the
+            x-axis and often leads to not so useful models. However, signal quality measurements are typically varied,
+            so the most useful models will fit a channels signal quality.
+            <br>
+            <br>
+            Hide Models:
+            <img src="http://www.employees.org/~ad4437/hidemodels.JPG" alt="Hide Model Button" height="40px">
+            <br>
+            This button will toggle model visibility. Click it once to hide all models, and click it a second time to
+            make them reappear.
+            <br>
+            <br>
+            Filtering the Data:
+            <img src="http://www.employees.org/~ad4437/unactivefilter.JPG" alt="Unactive Filter Button" height="40px">
+            <img src="http://www.employees.org/~ad4437/activefilter.JPG" alt="Active Filter Button" height="40px">
+            <img src="http://www.employees.org/~ad4437/applyandclearfilters.JPG" alt="Apply and Clear Filter Buttons"
+                height="40px">
+            <br>
+            The filter button will open a filter prompt window with available filter conditions. When there are no
+            filter conditions applied to the data, the filter button will be set to unactive (gray button), but active
+            (green button) when filter conditions have been applied.
+            <br>
+            <br>
+            <img src="http://www.employees.org/~ad4437/filteroptions.JPG" alt="Filter Prompt Window"
+                style="height: auto; width: 75%; margin-left: 12.5%; margin-right: 12.5%;">
+            <br>
+            <br>
+            Signal measurement distributions can be filtered by Time or Weather Conditions.
+        </p>
+        <br>
+        <div class="container" style="margin-left: 0px; padding-left: 0px;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Filter Input</th>
+                        <th>Function</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Time of Day</td>
+                        <td>Only select scans from each day that ran during the designated time period i.e. select scans
+                            from 6AM to 6PM vice versa</td>
+                    </tr>
+                    <tr>
+                        <td>Scan Date Range</td>
+                        <td>Only select scans within the designated date range i.e. between 6/22/2020 and 7/21/2020</td>
+                    </tr>
+                    <tr>
+                        <td>Temperature Range</td>
+                        <td>Only select scans that report a temperature (in Farenheit) within the designated temperature
+                            range i.e. between 80&degF and 90&degF</td>
+                    </tr>
+                    <tr>
+                        <td>Wind Speed Range</td>
+                        <td>Only select scans that report a wind speed (in miles per hour) within the designated wind
+                            speed range i.e. between 10mph and 20mph</td>
+                    </tr>
+                    <tr>
+                        <td>Wind Direction Range</td>
+                        <td>Only select scans that report a wind direction (in degrees) within the designated wind
+                            direction range i.e. between 150&deg and 180&deg</td>
+                    </tr>
+                    <tr>
+                        <td>Humidity Range</td>
+                        <td>Only select scans that report a humidity percentage within the designated humidity
+                            range i.e. between 80% and 100% humidity</td>
+                    </tr>
+                    <tr>
+                        <td>Weather Status</td>
+                        <td>Only select scans that report a weather status (forcast) matching the selected weather
+                            status</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <br>
+        <p>
+            Interact with time or date pickers by clicking the clock or calendar icons; A date/time picker should
+            appear. To apply filter conditions to a data set, use the "Apply" button. To remove filter conditions,
+            re-enter the filter window and press the "Clear All Filters" Button. Filters applied to one channel/antenna
+            instance will be applied to any other selected channels or antennas until the filters are cleared.
+        </p>
+        <br>
+        <h2>Scan Summary <a href="http://www.employees.org:58000/graphs/scansummary" target="_blank"><i
+                    class="fa fa-external-link" aria-hidden="true"></i></a></h2>
+        <p>
+            Plotting channel signal measurements for an individual scan.
+            <br>
+            <br>
+            Scan Start Time:
+            <img src="http://www.employees.org/~ad4437/scanstarttime.JPG" alt="Scan Start Time" height="40px">
+            <br>
+            This datetime picker will let you pick the date and time of any scan run for the selected antenna instance.
+            The datetime picker will appear after clicking the calendar icon. When selecting a datetime, the scan taken
+            the closest to the selected time will be graphed. Scans are automatically run 7 minutes past the hour, but
+            manual scans are also available for selection. To quickly switch between scans, use the
+            <i class="fa fa-arrow-left" aria-hidden="true"></i> key to select the same time on the previous day and the
+            <i class="fa fa-arrow-right" aria-hidden="true"></i> key to select the same time on the next day while the
+            datetime picker is open. To jump one week between scans, use the <i class="fa fa-arrow-up"
+                aria-hidden="true"></i> and <i class="fa fa-arrow-down" aria-hidden="true"></i> keys.
+        </p>
+    </div>
+</div>
+{% endblock header %}

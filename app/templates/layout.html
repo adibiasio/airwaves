@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Select Box and Bootstrap CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/bootstrap.min.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Add icon library -->
+    <script src="https://use.fontawesome.com/37823f5c3e.js"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- External scripts -->
+    <script type="text/javascript" src="{{ url_for('static', filename = 'jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'bootstrap.min.js') }}"></script>
+
+    {% if title %}
+    <title>{{ title }}</title>
+    {% else %}
+    <title>AirWaves</title>
+    {% endif %}
+</head>
+
+<body class="body">
+    <nav class="navbar navbar-inverse navbar-static-top" style="margin-bottom: 0px;">
+        <div class="container fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="http://www.employees.org:58000/home"
+                    style="display: flex; align-items: center;">
+                    <img src="{{ url_for('static', filename='favicon.ico') }}" height="30" width="30" alt="">
+                    <div style="margin-left: 5px;">AirWaves</div>
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav" style="font-size: 17px;">
+                    <li><a href="http://www.employees.org:58000/home"><i class="fa fa-fw fa-home"></i> Home</a></li>
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="http://www.employees.org:58000/graphs">
+                            <i class="fa fa-fw fa-line-chart"></i> Graphing<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="http://www.employees.org:58000/graphs/trackchannel">Track Channel</a></li>
+                            <li><a href="http://www.employees.org:58000/graphs/channeldistribution">Channel
+                                    Distribution</a></li>
+                            <li><a href="http://www.employees.org:58000/graphs/scansummary">Scan Summary</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="http://www.employees.org:58000/help"><i class="fa fa-fw fa-question-circle"></i>
+                            Help</a>
+                    <li><a href="http://www.employees.org:58000/api">API</a></li>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block header %}{% endblock %}
+</body>
+
+</html>
