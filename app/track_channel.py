@@ -68,7 +68,7 @@ class TrackChannels():
 
         annotationsdf = annotationsdf.drop(columns=["status", "temperature", "wind_direction", "wind_speed", "humidity"])
 
-        scans = load("SELECT scan_instance, datetime(start_time,'unixepoch','localtime') as start_time FROM scan")
+        scans = load("SELECT scan_instance, datetime(start_time,'unixepoch','-4 hours') as start_time FROM scan")
         # scans = scans.rename(columns={"datetime(start_time,'unixepoch','localtime')":"start_time"})
         scans = scans.astype({"start_time":"datetime64[ns]"})
         self.mdf = pd.merge(signals, scans, how="inner", on=["scan_instance"]) # merged data frame
