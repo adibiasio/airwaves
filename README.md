@@ -5,7 +5,13 @@ Frequencies recieved by an antenna are run through an HDHomeRun Connect Duo tune
 # Electromagentic Interference
 AirWaves started as a way to determine the effects of solar panels on TV reception via an antenna. After their installation, the solar panels produced visible effects on VHF channels:
 
-![Signal Quality Graph of Real Channel 5](http://www.employees.org/~ad4437/channel5snq.png)
+Before Installation:
+
+![Signal Quality Graph of Real Channel 5 Before Solar Panels](http://www.employees.org/~ad4437/channel5snqBeforeSolar.JPG)
+
+After Installation:
+
+![Signal Quality Graph of Real Channel 5 After Solar Panels](http://www.employees.org/~ad4437/channel5snq.png)
 
 As can be seen in the graph, the signal quality is poor during the day (when the sun is up) and strong during the night (when the sun is down). The signal quality is so poor during the day that the signal, at times, cannot be deciphered, as seen with the picture quality graph below.
 
