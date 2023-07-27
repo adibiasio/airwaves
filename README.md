@@ -1,7 +1,27 @@
 # Overview
-[AirWaves](http://www.employees.org:58000/) is a website monitoring tv reception signals in the Greater Boston Area. This website utilizes the Plotly JS and Python graphing libraries to explore relationships between signal strength, signal quality, and symbol (picture) quality and weather conditions for real channel frequencies. 
+AirWaves is a website monitoring tv reception signals in the Greater Boston Area. This website utilizes the Plotly JS and Python graphing libraries to explore relationships between signal strength, signal quality, and symbol (picture) quality and weather conditions for real channel frequencies. 
+
 # Data Management
 Frequencies recieved by an antenna are run through an HDHomeRun Connect Duo tuner. These frequencies (signal measurements) are fetched from the tuner's API and stored on a database maintained on our server. AirWaves reads signal measurements and weather data from this database.
+
+# Services
+AirWaves offers three main services: Track Channel, Channel Distribution, and Scan Summary.
+
+### Track Channel
+Plotting Channel Signal Measurements Over Time. Link changes in signal measurements to weather conditions.
+
+![Track Channel](http://www.employees.org/~ad4437/trackchannel.png)
+
+### Channel Distribution
+Plotting Signal Measurement Distributions for Various Channels. View the signal measurement distribution of tv reception for your weekly programs via the filter button
+
+![Track Channel](http://www.employees.org/~ad4437/channeldistribution.png)
+
+### Scan Summary
+Plotting Channel Signal Measurements for an Individual Scan. View the latest scan data in more detail.
+
+![Track Channel](http://www.employees.org/~ad4437/scansummary.png)
+
 # Electromagentic Interference
 AirWaves started as a way to determine the effects of solar panels on TV reception via an antenna. After their installation, the solar panels produced visible effects on VHF channels:
 
